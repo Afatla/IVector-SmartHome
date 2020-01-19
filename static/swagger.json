@@ -1,0 +1,191 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "REST API for ivector usage",
+    "version": "1.0",
+    "title": "REST API"
+  },
+  "paths": {
+    "/ivector": {
+      "post": {
+        "tags": [
+          "wav to ivector"
+        ],
+        "summary": "return ivector",
+        "operationId": "get_ivector",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "description": "file to upload",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/score": {
+      "post": {
+        "tags": [
+          "get score from ivectors"
+        ],
+        "summary": "return score",
+        "operationId": "count_score",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "description": "file to upload",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/matrices": {
+      "get": {
+        "tags": [
+          "get matrices"
+        ],
+        "summary": "return matrix",
+        "operationId": "get_ready_matrices",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "matrix_id",
+            "in": "path",
+            "required": true,
+            "description": "TV, LDA, PLDA_c, PLDA_gamma, PLDA_k, PLDA_lambda",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/mfcc": {
+      "post": {
+        "tags": [
+          "get mfcc from wav"
+        ],
+        "summary": "return mfcc",
+        "operationId": "get_mfcc",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "description": "file to upload",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/mfcc2ivector": {
+      "post": {
+        "tags": [
+          "get ivector from mfcc"
+        ],
+        "summary": "return ivector",
+        "operationId": "mfcc_to_ivector",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "description": "file to upload",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/stats": {
+      "post": {
+        "tags": [
+          "get statistics"
+        ],
+        "summary": "return satistics",
+        "operationId": "get_stats",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "description": "file to upload",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "name": "stats",
+            "in": "path",
+            "required": true,
+            "description": "f, n",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}
