@@ -361,6 +361,7 @@ class IVector():
         print '  Saving ivec to:', path
         np.savetxt(path, ivector.ravel(), newline=' ', fmt='%f')
 
+
     def mfcc_to_ivector(self, fea):
         n_data, d_data = fea.shape
 
@@ -482,7 +483,7 @@ class IVector():
 
             self.save_ivector_to_file(ivector,
                                       directory_ivectors+"/"+
-                                      file.split("/")[-1].split(".")[0]+".txt")
+                                      file.split("/")[-1].split(".")[0])
 
 
 if __name__ == '__main__':

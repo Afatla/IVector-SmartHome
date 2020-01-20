@@ -52,21 +52,23 @@ def get_columns():
         lista.append("el_"+str(i))
     return lista
 
-def get_LDA(Dict, lista, osoby):
+def get_LDA(Dict, lista, osoby, test_list, test_class):
     lda = LDA(n_components=3)
     X = np.array(list(Dict.values()))
     X = pd.DataFrame(X, columns=lista)
+    test_list = np.array(test_list)
+    test_list = pd.DataFrame(test_list, columns=lista)
     y = pd.Categorical.from_codes(get_codes(Dict, codes=[]), osoby)
     df = X.join(pd.Series(y, name='class'))
     le = LabelEncoder()
     y = le.fit_transform(df['class'])
     X_lda = lda.fit_transform(X, y)
-    proba = lda.predict_proba(X)
+    proba = lda.predict_proba(test_list)
     osoby.sort()
 
     proba_df = pd.DataFrame(proba, columns=osoby)
-    proba_df = proba_df.join(pd.Series(Dict.keys(), name="class"))
-    return X_lda, X, lda
+    proba_df = proba_df.join(pd.Series(test_class, name="class"))
+    print()
 
 def scatter(X_lda, osoby, colmap={}):
 
@@ -80,7 +82,13 @@ IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=directory)
 
 osoby = get_people(Drzwi)
 codes = get_codes(Drzwi)
-X_lda, X, lda = get_LDA(Dict=Drzwi, lista=get_columns(), osoby=osoby)
+test_list = []
+test_class = []
+for i in range(1, len(list(Drzwi.keys()))):
+    test_list.append(list(Drzwi.values())[0])
+    test_class.append(list(Drzwi.keys())[0])
+Drzwi.__delitem__(list(Drzwi.keys())[0])
+X_lda, X, lda = get_LDA(Dict=Drzwi, lista=get_columns(), osoby=osoby, test_list=test_list, test_class=test_class)
 
 print()
 
