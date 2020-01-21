@@ -1,7 +1,7 @@
 import os
 import numpy as np
 
-directory = 'C:/AGA_studia/inzynierka/DATA/mezczyzni'
+directory = 'C:/AGA_studia/inzynierka/DATA/wavy_sklejone_zdania_po_5_mezczyzni'
 Labels = []
 for file in os.listdir(directory):
     Labels.append(file.split("_")[-2])
@@ -9,7 +9,7 @@ drzwi = Labels.count("drzwi")
 muz = Labels.count("muzyka")
 sw = Labels.count("swiatlo")
 temp = Labels.count("temp")
-len(Labels)
+l = len(Labels)
 print()
 
 Count = {}

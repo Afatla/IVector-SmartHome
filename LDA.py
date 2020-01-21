@@ -94,7 +94,6 @@ def cluster(X_lda, IVectors):
     return labels, Centers, centroids, Drzwi, Muzyka, Swiatlo, Temp, drzwi, muz, swiatlo, temp
 
 def scatter(X_lda, centroids, IVectors, title, path_save):
-    colmap = {0: 'r', 1: 'g', 2: 'b', 3: 'y'}
     plt.xlabel('LD1')
     plt.ylabel('LD2')
     colmap_ = {"drzwi": 'r', "muzyka": 'g', "swiatlo": 'b', "temp": 'y'}
@@ -105,6 +104,7 @@ def scatter(X_lda, centroids, IVectors, title, path_save):
     for i in range(len(centroids)):
         plt.scatter(*centroids[i], color='k', s=20)
     plt.title(title)
+    plt.legend(["Wlacz muzyke", "Otworz drzwi", "Zwieksz temperature", "Zapal swiatlo"])
     if path_save:
         plt.savefig(path_save)
     plt.show()
@@ -115,7 +115,8 @@ IVectors = load_ivectors(directory1, pre_label="po5_")
 IVectors = load_ivectors(directory2, pre_label="po10_", IVectors=IVectors)
 X_lda = get_LDA(IVectors)
 labels, Centers, centroids, Drzwi, Muzyka, Swiatlo, Temp, drzwi, muz, swiatlo, temp = cluster(X_lda, IVectors)
-scatter(X_lda, centroids, IVectors, title="", path_save=None)
+scatter(X_lda, centroids, IVectors, title="", path_save="C:\Users\Agnieszka\Desktop\inzynierka\lda\LDA_inz")
+print()
 
 
 
