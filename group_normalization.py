@@ -6,7 +6,7 @@ Muzyka = {}
 Swiatlo = {}
 Temp = {}
 IVectors = dict()
-directory = 'C:/AGA_studia/inzynierka/DATA/ivectory'
+directory = 'C:/AGA_studia/inzynierka/DATA/ivectory_10x_to_samo'
 for file in os.listdir(directory):
     f = open(directory + "/" + file)
     ivector = f.read().split()
@@ -46,7 +46,7 @@ for key in list(Temp.keys()):
     Temp_centr[key] = (np.array(Temp[key]) - mean_temp) / np.linalg.norm(np.array(Temp[key]))
     IVectors_centr[key] = Temp_centr[key]
 
-directory = 'C:/AGA_studia/inzynierka/DATA/ivectory_norm_grupami/'
+directory = 'C:/AGA_studia/inzynierka/DATA/ivectory_10x_to_samo_norm_grupami/'
 for key in list(IVectors_centr.keys()):
     np.savetxt(directory+key+".txt", IVectors_centr[key], newline=' ', fmt='%f')
 print()

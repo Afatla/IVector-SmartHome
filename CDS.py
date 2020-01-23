@@ -2,7 +2,7 @@ from scipy.spatial.distance import cosine as CDS
 import os
 from sklearn.decomposition import PCA
 import numpy as np
-
+import matplotlib.pyplot as plt
 def load_ivectors(IVectors={}, Drzwi={}, Muzyka={}, Swiatlo={}, Temp={}, directory=""):
     for file in os.listdir(directory):
         f = open(directory + "/" + file)
@@ -57,9 +57,22 @@ def get_distances(X, Keys, Dict):
 
     return Distances
 
-path = 'C:/AGA_studia/inzynierka/DATA/ivectory_10x_to_samo'
+path = 'C:/AGA_studia/inzynierka/DATA/ivectory_centr_grupami'
 IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=path)
-Dict = Drzwi
+Dict = Swiatlo
+people = get_people(Dict)
+# CDS dla ivectorow roznych osob
+Distances_impostor = {}
+for i in range(len(list(Dict.keys()))):
+    test = list(Dict.values())[i]
+    test_k = list(Dict.keys())[i]
+    for p in people:
+        enroll = []
+        for key in list(Dict.keys()):
+            if key.split(key.split("_")[-2])[0] == p + "_" and key.split(key.split("_")[-2])[0] != test_k:
+                enroll.append(Dict[key])
+        enroll = np.mean(np.array(enroll))
+        Distances_impostor[test_k + " " + p] = CDS(test, enroll)
 
 # dla kazdej probki porownanie do sredniej z jego innych nagran
 Distances_target = {}
@@ -72,6 +85,39 @@ for key_t in list(Dict.keys()):
             idx += 1
     Distances_target[key_t] = float(Distances_target[key_t]/idx)
     idx = 0
+mini = np.min(np.array(list(Distances_target.values())))
+MINI = np.min(np.array(list(Distances_impostor.values())))
+maxi = np.max(np.array(list(Distances_target.values())))
+MAXI = np.max(np.array(list(Distances_impostor.values())))
+if MINI < mini:
+    mini = MINI
+if MAXI > maxi:
+    maxi = MAXI
+FAR_list = []
+FRR_list = []
+for i in np.arange(mini, maxi, 1e-4):
+    count = 0
+    for value in list(Distances_target.values()):
+        if value > i:
+            count += 1
+    FRR = np.float64(np.float64(count)/np.float64(len(Distances_target)))
+    FRR_list.append(FRR)
+    count = 0
+    for value in list(Distances_impostor.values()):
+        if value < i:
+            count += 1
+    FAR = np.float64(np.float64(count)/np.float64(len(Distances_impostor)))
+    FAR_list.append(FAR)
+plt.plot(FAR_list, FRR_list)
+plt.xlabel("FAR")
+plt.ylabel("FRR")
+plt.show()
+sumy = []
+for i in range(len(FAR_list)):
+    sumy.append(FAR_list[i]+FRR_list[i])
+print(np.min(sumy))
+print(sumy.index(np.min(sumy)))
+'''
 # dla kazdej probki porownanie do sredniej z pozostalych nagran
 Distances_impostor = {}
 idx = 0
@@ -90,12 +136,12 @@ for key in list(Distances_target.keys()):
     LR[key] = Distances_target[key]/Distances_impostor[key]
 count = 0
 for value in list(LR.values()):
-    if value > 1:
+    if value < 1:
         count += 1
 
 len(LR)
 print()
-
+'''
 '''
 # CDS po redukcji wymiarow PCA kazdy z kazdym
 X = list(Drzwi.values())
@@ -145,7 +191,7 @@ for i in range(len(list(Dict.keys()))):
             if key.split("drzwi")[0] == p + "_" and key.split("drzwi")[0] != test_k:
                 enroll.append(Dict[key])
         enroll = np.mean(np.array(enroll))
-        Distances_impostor[test_k + " " + p] = np.degrees(np.arccos(1-CDS(test, enroll)))
+        Distances_impostor[test_k + " " + p] = CDS(test, enroll)
 print(np.min(np.array(Distances_impostor.values())))
 '''
 '''
