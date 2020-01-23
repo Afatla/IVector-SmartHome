@@ -88,23 +88,7 @@ directory = 'C:/AGA_studia/inzynierka/DATA/ivectory_centr_grupami'
 IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=directory)
 Scores = {}
 people = get_people(Muzyka)
-'''
-filtered = copy.deepcopy(Muzyka)
-for i in range(len(people)):
-    p = people[i]
-    for key in list(filtered.keys()):
-        if len(key.split("_")) == 3:
-            if key.split("_")[-3] != p:
-                filtered.pop(key)
-        if len(key.split("_")) == 4:
-            if key.split("_")[-4] + "_" + key.split("_")[-3] != p:
-                filtered.pop(key)
-    if len(filtered) > 1:
-        s = PLDA(filtered)
-        Scores[p] = s
-'''
-'''
-
+# tu ustalamy całą kolumnę z ivectorami jednej osoby
 p = people[0]
 filtered = copy.deepcopy(Muzyka)
 for key in list(filtered.keys()):
@@ -114,7 +98,7 @@ for key in list(filtered.keys()):
     if len(key.split("_")) == 4:
         if key.split("_")[-4] + "_" + key.split("_")[-3] != p:
             filtered.pop(key)
-
+# tutaj liczymy score kązdego ivectora do tych z kolumny
 temp = {}
 Scores = {}
 for key in list(Muzyka.keys()):
@@ -124,9 +108,9 @@ for i in range(len(temp)):
     test = {}
     for idx in range(len(filtered)):
         test[list(temp.keys())[i]+"_row_"+str(idx)] = temp[list(temp.keys())[i]]
-    s = PLDA_impostor(filtered, test)
+    s = get_PLDA(filtered, test)
     Scores[list(temp.keys())[i]] = s
-'''
+# za każdym obrotem pętli jedna osoba
 Scores = {}
 for i in range(len(people)):
     p = people[i]
@@ -141,6 +125,7 @@ for i in range(len(people)):
     test_row = 0
     test = {}
     idx = 0
+    # scorujemy tylko jedną osobę ze sobą
     for j in range(len(filtered)-1):
         test[list(filtered.keys())[test_row] + "_" + str(idx)] = \
             filtered[list(filtered.keys())[test_row]]

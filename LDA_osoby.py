@@ -88,7 +88,7 @@ for i in range(1, len(list(Drzwi.keys()))):
     test_list.append(list(Drzwi.values())[0])
     test_class.append(list(Drzwi.keys())[0])
 Drzwi.__delitem__(list(Drzwi.keys())[0])
-X_lda, X, lda = get_LDA(Dict=Drzwi, lista=get_columns(), osoby=osoby, test_list=test_list, test_class=test_class)
+X_lda = get_LDA(Dict=Drzwi, lista=get_columns(), osoby=osoby, test_list=test_list, test_class=test_class)
 
 print()
 
