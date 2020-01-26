@@ -68,11 +68,8 @@ def get_LDA(Dict, lista, osoby, n_test=2, n_components=3):
         test_list = []
         for j in range(len(test_class)):
             test_list.append(Dict[test_class[j]])
-        test_Dict = {}
-        for i in range(n_test):
-            test_Dict[list(Dict.keys())[i]] = list(Dict.values())[i]
-        for i in range(n_test):
-            Enroll.__delitem__(list(Dict.keys())[i])
+        for jj in range(len(test_class)):
+            Enroll.__delitem__(test_class[jj])
         test_list = np.array(test_list)
 
         X = np.array(list(Enroll.values()))
@@ -84,13 +81,12 @@ def get_LDA(Dict, lista, osoby, n_test=2, n_components=3):
         y = le.fit_transform(df['class'])
 
         X_lda = lda.fit_transform(X, y)
-        #proba = lda.predict_proba(test_list)
+
         osoby.sort()
-        #proba = pd.DataFrame(proba, columns=osoby)
-        #proba = proba.join(pd.Series(test_class, name="class"))
+
         p = lda.predict(test_list)
-        for i in range(n_test):
-            Results[test_class[i]] = osoby[p[i]]
+        for ii in range(n_test):
+            Results[test_class[ii]] = osoby[p[ii]]
 
     return Results
 
