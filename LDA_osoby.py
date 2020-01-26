@@ -90,6 +90,7 @@ def get_LDA(Dict, lista, osoby, n_test=2, n_components=3):
 
     return Results
 
+
 def scatter(X_lda, osoby, colmap={}):
 
     for i in range(0, len(X_lda[:, 0])):
