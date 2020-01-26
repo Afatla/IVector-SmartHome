@@ -59,8 +59,20 @@ def get_distances(X, Keys, Dict):
 
 path = 'C:/AGA_studia/inzynierka/DATA/ivectory_centr_grupami'
 IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=path)
-Dict = Swiatlo
+Dict = Drzwi
 people = get_people(Dict)
+X = list(Dict.values())
+'''
+# z redukcja
+pca = PCA(n_components=100)
+pca.fit(X)
+X_embedded = pca.fit_transform(X)
+i = 0
+X_embedded = list(X_embedded)
+for key in list(Dict.keys()):
+    Dict[key] = X_embedded[i]
+    i += 1
+
 # CDS dla ivectorow roznych osob
 Distances_impostor = {}
 for i in range(len(list(Dict.keys()))):
@@ -108,15 +120,81 @@ for i in np.arange(mini, maxi, 1e-4):
             count += 1
     FAR = np.float64(np.float64(count)/np.float64(len(Distances_impostor)))
     FAR_list.append(FAR)
+
 plt.plot(FAR_list, FRR_list)
 plt.xlabel("FAR")
 plt.ylabel("FRR")
 plt.show()
-sumy = []
-for i in range(len(FAR_list)):
-    sumy.append(FAR_list[i]+FRR_list[i])
-print(np.min(sumy))
-print(sumy.index(np.min(sumy)))
+
+plt.plot(np.arange(mini, maxi, 1e-4), FAR_list)
+plt.plot(np.arange(mini, maxi, 1e-4), FRR_list)
+plt.legend(["FAR", "FRR"])
+plt.ylabel("Wartosc bledu")
+plt.xlabel("Prog akceptacji")
+plt.show()
+'''
+print()
+
+# CDS dla ivectorow roznych osob
+Distances_impostor = {}
+for i in range(len(list(Dict.keys()))):
+    test = list(Dict.values())[i]
+    test_k = list(Dict.keys())[i]
+    for p in people:
+        enroll = []
+        for key in list(Dict.keys()):
+            if key.split(key.split("_")[-2])[0] == p + "_" and key.split(key.split("_")[-2])[0] != test_k:
+                enroll.append(Dict[key])
+        enroll = np.mean(np.array(enroll))
+        Distances_impostor[test_k + " " + p] = CDS(test, enroll)
+
+# dla kazdej probki porownanie do sredniej z jego innych nagran
+Distances_target = {}
+idx = 0
+for key_t in list(Dict.keys()):
+    Distances_target[key_t] = 0
+    for key_e in list(Dict.keys()):
+        if key_e.split(key_e.split("_")[-2])[0] == key_t.split(key_t.split("_")[-2])[0] and key_e != key_t:
+            Distances_target[key_t] += CDS(Dict[key_t], Dict[key_e])
+            idx += 1
+    Distances_target[key_t] = float(Distances_target[key_t]/idx)
+    idx = 0
+mini = np.min(np.array(list(Distances_target.values())))
+MINI = np.min(np.array(list(Distances_impostor.values())))
+maxi = np.max(np.array(list(Distances_target.values())))
+MAXI = np.max(np.array(list(Distances_impostor.values())))
+if MINI < mini:
+    mini = MINI
+if MAXI > maxi:
+    maxi = MAXI
+FAR_list = []
+FRR_list = []
+for i in np.arange(mini, maxi, 1e-4):
+    count = 0
+    for value in list(Distances_target.values()):
+        if value > i:
+            count += 1
+    FRR = np.float64(np.float64(count)/np.float64(len(Distances_target)))
+    FRR_list.append(FRR)
+    count = 0
+    for value in list(Distances_impostor.values()):
+        if value < i:
+            count += 1
+    FAR = np.float64(np.float64(count)/np.float64(len(Distances_impostor)))
+    FAR_list.append(FAR)
+
+plt.plot(FAR_list, FRR_list)
+plt.xlabel("FAR")
+plt.ylabel("FRR")
+plt.show()
+plt.plot(np.arange(mini, maxi, 1e-4), FAR_list)
+plt.plot(np.arange(mini, maxi, 1e-4), FRR_list)
+plt.legend(["FAR", "FRR"])
+plt.ylabel("Wartosc bledu")
+plt.xlabel("Prog akceptacji")
+plt.show()
+print()
+
 '''
 # dla kazdej probki porownanie do sredniej z pozostalych nagran
 Distances_impostor = {}

@@ -7,7 +7,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.cluster import KMeans
 
 
-def load_ivectors(directory, pre_label="", IVectors={}):
+def load_ivectors(IVectors={}, Drzwi={}, Muzyka={}, Swiatlo={}, Temp={}, directory=""):
     for file in os.listdir(directory):
         f = open(directory + "/" + file)
         ivector = f.read().split()
@@ -15,8 +15,16 @@ def load_ivectors(directory, pre_label="", IVectors={}):
             index = ivector.index(el)
             el = float(el)
             ivector[index] = el
-        IVectors[pre_label + file.split(".")[0]] = ivector
-    return IVectors
+        if file.split("_")[-2] == "drzwi":
+            Drzwi[file.split(".")[0]] = ivector
+        elif file.split("_")[-2] == "muzyka":
+            Muzyka[file.split(".")[0]] = ivector
+        elif file.split("_")[-2] == "swiatlo":
+            Swiatlo[file.split(".")[0]] = ivector
+        elif file.split("_")[-2] == "temp":
+            Temp[file.split(".")[0]] = ivector
+        IVectors[file.split(".")[0]] = ivector
+    return IVectors, Drzwi, Muzyka, Swiatlo, Temp
 
 def get_codes(IVectors):
     codes = []
@@ -32,9 +40,9 @@ def get_codes(IVectors):
         codes_names = ["drzwi", "muzyka", "swiatlo", "temp"]
     return codes, codes_names
 
-def get_columns():
+def get_columns(n = 600):
     lista = []
-    for i in range(0, 600):
+    for i in range(0, n):
         lista.append("el_" + str(i))
     return lista
 
@@ -44,12 +52,18 @@ def get_LDA(IVectors):
     X = np.array(list(IVectors.values()))
     X = pd.DataFrame(X, columns=lista)
     y = pd.Categorical.from_codes(codes, codes_names)
-    lda = LDA(n_components=2)
+    lda = LDA(n_components=3)
     df = X.join(pd.Series(y, name='class'))
     le = LabelEncoder()
     y = le.fit_transform(df['class'])
     X_lda = lda.fit_transform(X, y)
-    return X_lda
+    i = 0
+    X_lda_dict = {}
+    for key in list(IVectors.keys()):
+        X_lda_dict[key] = X_lda[i]
+        i += 1
+    
+    return X_lda, X_lda_dict
 
 def cluster(X_lda, IVectors):
     kmeans = KMeans(n_clusters=4)
@@ -109,11 +123,10 @@ def scatter(X_lda, centroids, IVectors, title, path_save):
         plt.savefig(path_save)
     plt.show()
 
-directory1 = 'C:/AGA_studia/inzynierka/DATA/ivectory_sklejone_zdania_po_5'
-directory2 = 'C:/AGA_studia/inzynierka/DATA/ivectory_sklejone_zdania_po_10'
-IVectors = load_ivectors(directory1, pre_label="po5_")
-IVectors = load_ivectors(directory2, pre_label="po10_", IVectors=IVectors)
-X_lda = get_LDA(IVectors)
+path = 'C:/AGA_studia/inzynierka/DATA/ivectory_centr_grupami'
+IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=path)
+X_lda, X_lda_dict = get_LDA(IVectors)
+
 labels, Centers, centroids, Drzwi, Muzyka, Swiatlo, Temp, drzwi, muz, swiatlo, temp = cluster(X_lda, IVectors)
 scatter(X_lda, centroids, IVectors, title="", path_save="C:\Users\Agnieszka\Desktop\inzynierka\lda\LDA_inz")
 print()
