@@ -86,7 +86,6 @@ def get_LDA(Dict, lista, osoby, n_comp=3, n_test=2):
 
     return Results
 
-
 def scatter(X_lda, osoby, colmap={}):
 
     for i in range(0, len(X_lda[:, 0])):
@@ -100,45 +99,9 @@ Dict = Drzwi
 osoby = get_people(Dict)
 codes = get_codes(Dict)
 count = 0
-R_d = get_LDA(Dict=Dict, lista=get_columns(), osoby=osoby)
-for key in list(R_d.keys()):
-    if R_d[key] + "_" == key.split(key.split("_")[-2])[0]:
+R = get_LDA(Dict=Dict, lista=get_columns(), osoby=osoby)
+for key in list(R.keys()):
+    if R[key] + "_" == key.split(key.split("_")[-2])[0]:
         count += 1
-error_d = np.float((np.float(len(R_d))-np.float(count))/np.float(len(R_d)))
-Dict = Muzyka
-osoby = get_people(Dict)
-codes = get_codes(Dict)
-count = 0
-R_m = get_LDA(Dict=Dict, lista=get_columns(), osoby=osoby)
-for key in list(R_m.keys()):
-    if R_m[key] + "_" == key.split(key.split("_")[-2])[0]:
-        count += 1
-error_m = np.float((np.float(len(R_m))-np.float(count))/np.float(len(R_m)))
-Dict = Swiatlo
-osoby = get_people(Dict)
-codes = get_codes(Dict)
-count = 0
-R_s = get_LDA(Dict=Dict, lista=get_columns(), osoby=osoby)
-for key in list(R_s.keys()):
-    if R_s[key] + "_" == key.split(key.split("_")[-2])[0]:
-        count += 1
-error_s = np.float((np.float(len(R_s))-np.float(count))/np.float(len(R_s)))
-Dict = Temp
-osoby = get_people(Dict)
-codes = get_codes(Dict)
-count = 0
-R_t = get_LDA(Dict=Dict, lista=get_columns(), osoby=osoby)
-for key in list(R_t.keys()):
-    if R_t[key] + "_" == key.split(key.split("_")[-2])[0]:
-        count += 1
-error_t = np.float((np.float(len(R_t))-np.float(count))/np.float(len(R_t)))
+error = np.float((np.float(len(R))-np.float(count))/np.float(len(R)))
 print()
-
-
-
-
-
-
-
-
-
