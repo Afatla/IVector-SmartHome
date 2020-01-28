@@ -25,6 +25,7 @@ def load_ivectors(IVectors={}, Drzwi={}, Muzyka={}, Swiatlo={}, Temp={}, directo
         IVectors[file.split(".")[0]] = ivector
     return IVectors, Drzwi, Muzyka, Swiatlo, Temp
 
+
 def get_people(IVectors, osoby=[]):
     for key in list(IVectors.keys()):
         if len(key.split("_")) == 3:
@@ -34,6 +35,7 @@ def get_people(IVectors, osoby=[]):
             if key.split("_")[-4] + "_" + key.split("_")[-3] not in osoby:
                 osoby.append(key.split("_")[-4] + "_" + key.split("_")[-3])
     return osoby
+
 
 def get_codes(Dict, codes=[], Codes=[]):
     osoby = get_people(Dict)
@@ -50,18 +52,19 @@ def get_codes(Dict, codes=[], Codes=[]):
                     Codes.append(osoby[i])
     return codes, Codes
 
+
 def get_columns(n=600):
     lista = []
     for i in range(0, n):
         lista.append("el_"+str(i))
     return lista
 
-def get_LDA(Dict, lista, osoby, n_comp=3, n_test=2):
-    lda = LDA(n_components=n_comp)
-    Results = {}
+
+def get_LDA(Dict, lista, osoby, n_comp=3, n_test=2, Results = {}):
     l = list(Dict.keys())
     l.sort(key=lambda x: int(x.rsplit('_', 1)[-1]))
     for i in range(0, len(Dict)-n_test, n_test):
+        lda = LDA(n_components=n_comp)
         Enroll = copy.deepcopy(Dict)
         test_class = l[i:i+n_test]
         test_list = []
@@ -83,8 +86,17 @@ def get_LDA(Dict, lista, osoby, n_comp=3, n_test=2):
         p = lda.predict(test_list)
         for n in range(n_test):
             Results[test_class[n]] = osoby[p[n]]
-
     return Results
+
+
+def get_error(Dict, count=0):
+    osoby = get_people(Dict)
+    R = get_LDA(Dict=Dict, lista=get_columns(), osoby=osoby)
+    for key in list(R.keys()):
+        if R[key] + "_" == key.split(key.split("_")[-2])[0]:
+            count += 1
+    error = np.float((np.float(len(R))-np.float(count))/np.float(len(R)))
+    return R, error
 
 
 def scatter(X_lda, osoby, colmap={}):
@@ -94,45 +106,13 @@ def scatter(X_lda, osoby, colmap={}):
     plt.show()
 
 
-directory = 'C:/AGA_studia/inzynierka/DATA/ivectory_centr_grupami'
+directory = 'C:/AGA_studia/inzynierka/DATA/ivectory_20x_to_samo_centr_grupami'
 IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=directory)
 Dict = Drzwi
-osoby = get_people(Dict)
-codes = get_codes(Dict)
-count = 0
-R_d = get_LDA(Dict=Dict, lista=get_columns(), osoby=osoby)
-for key in list(R_d.keys()):
-    if R_d[key] + "_" == key.split(key.split("_")[-2])[0]:
-        count += 1
-error_d = np.float((np.float(len(R_d))-np.float(count))/np.float(len(R_d)))
+R_d, error_d = get_error(Dict)
+
 Dict = Muzyka
-osoby = get_people(Dict)
-codes = get_codes(Dict)
-count = 0
-R_m = get_LDA(Dict=Dict, lista=get_columns(), osoby=osoby)
-for key in list(R_m.keys()):
-    if R_m[key] + "_" == key.split(key.split("_")[-2])[0]:
-        count += 1
-error_m = np.float((np.float(len(R_m))-np.float(count))/np.float(len(R_m)))
-Dict = Swiatlo
-osoby = get_people(Dict)
-codes = get_codes(Dict)
-count = 0
-R_s = get_LDA(Dict=Dict, lista=get_columns(), osoby=osoby)
-for key in list(R_s.keys()):
-    if R_s[key] + "_" == key.split(key.split("_")[-2])[0]:
-        count += 1
-error_s = np.float((np.float(len(R_s))-np.float(count))/np.float(len(R_s)))
-Dict = Temp
-osoby = get_people(Dict)
-codes = get_codes(Dict)
-count = 0
-R_t = get_LDA(Dict=Dict, lista=get_columns(), osoby=osoby)
-for key in list(R_t.keys()):
-    if R_t[key] + "_" == key.split(key.split("_")[-2])[0]:
-        count += 1
-error_t = np.float((np.float(len(R_t))-np.float(count))/np.float(len(R_t)))
-print()
+
 
 
 
