@@ -3,6 +3,7 @@ import numpy as np
 import os
 import copy
 
+
 def load_ivectors(IVectors={}, Drzwi={}, Muzyka={}, Swiatlo={}, Temp={}, directory=""):
     for file in os.listdir(directory):
         f = open(directory + "/" + file)
@@ -22,6 +23,7 @@ def load_ivectors(IVectors={}, Drzwi={}, Muzyka={}, Swiatlo={}, Temp={}, directo
         IVectors[file.split(".")[0]] = ivector
     return IVectors, Drzwi, Muzyka, Swiatlo, Temp
 
+
 def get_people(IVectors, osoby=[]):
     for key in list(IVectors.keys()):
         if len(key.split("_")) == 3:
@@ -32,6 +34,7 @@ def get_people(IVectors, osoby=[]):
                 osoby.append(key.split("_")[-4] + "_" + key.split("_")[-3])
     return osoby
 
+
 def warp2us(ivecs, lda, lda_mu):
     """ i-vector pre-processing
         This function applies a global LDA, mean subtraction, and length
@@ -40,6 +43,7 @@ def warp2us(ivecs, lda, lda_mu):
     ivecs = ivecs.dot(lda) - lda_mu
     ivecs /= np.sqrt((ivecs ** 2).sum(axis=1)[:, np.newaxis]) # .sum(axis=1)
     return ivecs
+
 
 def bilinear_plda(Lambda, Gamma, c, k, Fe, Ft):
     """ Performs a full PLDA scoring
@@ -76,46 +80,53 @@ def get_PLDA(e, t):
 
     #print 'Computing PLDA score'
     s = bilinear_plda(Lambda, Gamma, c, k, enroll_ivec, test_ivec)
-
     return s[0, 0]
+
+
+def get_scores(Dict, PLDA_impostor = {}, PLDA_target = {}):
+    # dla kazdej probki porownanie do sredniej z jego innych nagran
+    idx = 0
+    for key_t in list(Dict.keys()):
+        PLDA_target[key_t] = 0
+        for key_e in list(Dict.keys()):
+            if key_e.split(key_e.split("_")[-2])[0] == key_t.split(key_t.split("_")[-2])[0] and key_e != key_t:
+                PLDA_target[key_t] += get_PLDA(np.array([Dict[key_t], Dict[key_t]]),
+                                               np.array([Dict[key_e], Dict[key_e]]))
+                idx += 1
+        PLDA_target[key_t] = float(PLDA_target[key_t] / idx)
+        idx = 0
+    # dla kazdej probki porownanie do sredniej z pozostalych nagran
+    '''
+    idx = 0
+    for key_t in list(Dict.keys()):
+        PLDA_impostor[key_t] = 0
+        for key_e in list(Dict.keys()):
+            if key_e.split(key_e.split("_")[-2])[0] != key_t.split(key_t.split("_")[-2])[0]:
+                PLDA_impostor[key_t] += get_PLDA(np.array([Dict[key_t], Dict[key_t]]),
+                                                 np.array([Dict[key_e], Dict[key_e]]))
+                idx += 1
+        PLDA_impostor[key_t] = float(PLDA_impostor[key_t] / idx)
+        print(key_t)
+        idx = 0
+    '''
+    return PLDA_impostor, PLDA_target
+
+
+def get_LR(PLDA_impostor, PLDA_target, LR = {}):
+    # LR
+    for key in list(PLDA_impostor.keys()):
+        LR[key] = PLDA_target[key] / PLDA_impostor[key]
+    count = 0
+    for value in list(LR.values()):
+        if value < 1:
+            count += 1
+    return LR
+
 
 directory = 'C:/AGA_studia/inzynierka/DATA/ivectory_centr_grupami'
 IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=directory)
 Dict = Drzwi
-# dla kazdej probki porownanie do sredniej z jego innych nagran
-PLDA_target = {}
-idx = 0
-for key_t in list(Dict.keys()):
-    PLDA_target[key_t] = 0
-    for key_e in list(Dict.keys()):
-        if key_e.split(key_e.split("_")[-2])[0] == key_t.split(key_t.split("_")[-2])[0] and key_e != key_t:
-            PLDA_target[key_t] += get_PLDA(np.array([Dict[key_t], Dict[key_t]]), np.array([Dict[key_e], Dict[key_e]]))
-            idx += 1
-    PLDA_target[key_t] = float(PLDA_target[key_t]/idx)
-    idx = 0
-# dla kazdej probki porownanie do sredniej z pozostalych nagran
-PLDA_impostor = {}
-idx = 0
-for key_t in list(Dict.keys()):
-    PLDA_impostor[key_t] = 0
-    for key_e in list(Dict.keys()):
-        if key_e.split(key_e.split("_")[-2])[0] != key_t.split(key_t.split("_")[-2])[0]:
-            PLDA_impostor[key_t] += get_PLDA(np.array([Dict[key_t], Dict[key_t]]), np.array([Dict[key_e], Dict[key_e]]))
-            idx += 1
-    PLDA_impostor[key_t] = float(PLDA_impostor[key_t]/idx)
-    print(key_t)
-    idx = 0
-
-# LR
-LR = {}
-for key in list(PLDA_impostor.keys()):
-    LR[key] = PLDA_target[key]/PLDA_impostor[key]
-count = 0
-for value in list(LR.values()):
-    if value < 1:
-        count += 1
-
-
+PLDA_impostor, PLDA_target = get_scores(Dict)
 print()
 '''
 Scores = {}

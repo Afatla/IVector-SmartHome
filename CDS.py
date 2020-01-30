@@ -159,17 +159,14 @@ def det_plot(FAR_list, FRR_list):
     plt.ylabel("FRR")
     plt.yscale('log')
     plt.xscale('log')
-    # ticks_to_use = [0.001,0.002,0.005,0.01,0.02,0.05,0.1,0.2,0.5,1,2,5,10,20,50]
     ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
     ax.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
-    # ax.set_xticks(ticks_to_use)
-    # ax.set_yticks(ticks_to_use)
     plt.show()
 
 def calculate_and_plot(Dict):
     Distances_impostor, Distances_target = mean_cds(Dict)
     FRR_list, FAR_list, mini, maxi = get_error_lists(Distances_impostor, Distances_target)
-    far_frr_plot(mini, maxi, FAR_list, FRR_list)
+    #far_frr_plot(mini, maxi, FAR_list, FRR_list)
     det_plot(FAR_list, FRR_list)
     return Distances_impostor, Distances_target, FRR_list, FAR_list, mini, maxi
 

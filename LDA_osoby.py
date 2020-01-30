@@ -37,20 +37,18 @@ def get_people(IVectors, osoby=[]):
     return osoby
 
 
-def get_codes(Dict, codes=[], Codes=[]):
-    osoby = get_people(Dict)
-
+def get_codes(Dict, people, codes=[]):
     for key in list(Dict.keys()):
-        for i in range(len(osoby)):
+        for i in range(len(people)):
             if len(key.split("_")) == 3:
-                if key.split("_")[-3] == osoby[i]:
+                if key.split("_")[-3] == people[i]:
                     codes.append(i)
-                    Codes.append(osoby[i])
+
             if len(key.split("_")) == 4:
-                if key.split("_")[-4] + "_" + key.split("_")[-3] == osoby[i]:
+                if key.split("_")[-4] + "_" + key.split("_")[-3] == people[i]:
                     codes.append(i)
-                    Codes.append(osoby[i])
-    return codes, Codes
+
+    return codes
 
 
 def get_columns(n=600):
@@ -60,38 +58,37 @@ def get_columns(n=600):
     return lista
 
 
-def get_LDA(Dict, lista, osoby, n_comp=3, n_test=2, Results = {}):
+def get_LDA(Dict, lista, n_comp=3, n_test=2, Results={}, le=LabelEncoder()):
     l = list(Dict.keys())
     l.sort(key=lambda x: int(x.rsplit('_', 1)[-1]))
     for i in range(0, len(Dict)-n_test, n_test):
         lda = LDA(n_components=n_comp)
-        Enroll = copy.deepcopy(Dict)
+        train_Dict = copy.deepcopy(Dict)
         test_class = l[i:i+n_test]
-        test_list = []
         test_Dict = {}
         for ii in range(n_test):
-            test_list.append(Dict[test_class[ii]])
-            test_Dict[test_class[ii]] = test_list[ii]
-            Enroll.__delitem__(test_class[ii])
-        test_list = np.array(test_list)
-        X = np.array(list(Enroll.values()))
+            test_Dict[test_class[ii]] = Dict[test_class[ii]]
+            train_Dict.__delitem__(test_class[ii])
+        test_list = np.array(list(test_Dict.values()))
+        X = np.array(list(train_Dict.values()))
         X = pd.DataFrame(X, columns=lista)
-        codes, Codes = get_codes(Enroll, codes=[])
-        y = pd.Categorical.from_codes(codes, osoby)
+        people = get_people(train_Dict)
+        codes = get_codes(train_Dict, people)
+
+        y = pd.Categorical.from_codes(codes, people)
         df = X.join(pd.Series(y, name='class'))
-        le = LabelEncoder()
         y = le.fit_transform(df['class'])
-        X_lda = lda.fit_transform(X, y)
-        osoby.sort()
+        lda.fit(X, y)
+        people.sort()
         p = lda.predict(test_list)
+
         for n in range(n_test):
-            Results[test_class[n]] = osoby[p[n]]
+            Results[test_class[n]] = people[p[n]]
     return Results
 
 
 def get_error(Dict, count=0):
-    osoby = get_people(Dict)
-    R = get_LDA(Dict=Dict, lista=get_columns(), osoby=osoby)
+    R = get_LDA(Dict=Dict, lista=get_columns())
     for key in list(R.keys()):
         if R[key] + "_" == key.split(key.split("_")[-2])[0]:
             count += 1
@@ -99,14 +96,13 @@ def get_error(Dict, count=0):
     return R, error
 
 
-def scatter(X_lda, osoby, colmap={}):
-
+def scatter(X_lda):
     for i in range(0, len(X_lda[:, 0])):
         plt.scatter(X_lda[i, 0], X_lda[i, 1], color='g', s=5)
     plt.show()
 
 
-directory = 'C:/AGA_studia/inzynierka/DATA/ivectory_20x_to_samo_centr_grupami'
+directory = 'C:/AGA_studia/inzynierka/DATA/ivectory_centr_grupami'
 IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=directory)
 Dict = Drzwi
 R_d, error_d = get_error(Dict)
