@@ -1,7 +1,7 @@
 import os
 import numpy as np
 
-directory = 'C:/AGA_studia/inzynierka/DATA/ivectory_sklejone_zdania_po_10'
+directory = 'C:/AGA_studia/inzynierka/DATA/ivectory'
 IVectors = dict()
 for file in os.listdir(directory):
     f = open(directory+"/"+file)
@@ -24,7 +24,7 @@ for ii in range(len(X)):
         ivec[i] = ivec[i] - mean_ivector[i]
     X[ii] = ivec
 
-directory = 'C:/AGA_studia/inzynierka/DATA/ivectory_centr_sklejone_zdania_po_10'
+directory = 'C:/AGA_studia/inzynierka/DATA/ivectory_centr'
 idx = 0
 for key in list(IVectors.keys()):
     path = directory+"/"+key+".txt"

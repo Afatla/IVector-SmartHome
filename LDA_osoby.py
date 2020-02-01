@@ -78,7 +78,7 @@ def get_LDA(Dict, lista, n_comp=3, n_test=2, Results={}, le=LabelEncoder()):
         y = pd.Categorical.from_codes(codes, people)
         df = X.join(pd.Series(y, name='class'))
         y = le.fit_transform(df['class'])
-        lda.fit(X, y)
+        X_lda = lda.fit(X, y)
         people.sort()
         p = lda.predict(test_list)
 

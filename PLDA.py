@@ -96,7 +96,7 @@ def get_scores(Dict, PLDA_impostor = {}, PLDA_target = {}):
         PLDA_target[key_t] = float(PLDA_target[key_t] / idx)
         idx = 0
     # dla kazdej probki porownanie do sredniej z pozostalych nagran
-    '''
+
     idx = 0
     for key_t in list(Dict.keys()):
         PLDA_impostor[key_t] = 0
@@ -106,9 +106,9 @@ def get_scores(Dict, PLDA_impostor = {}, PLDA_target = {}):
                                                  np.array([Dict[key_e], Dict[key_e]]))
                 idx += 1
         PLDA_impostor[key_t] = float(PLDA_impostor[key_t] / idx)
-        print(key_t)
+        #print(key_t)
         idx = 0
-    '''
+
     return PLDA_impostor, PLDA_target
 
 
@@ -127,6 +127,8 @@ directory = 'C:/AGA_studia/inzynierka/DATA/ivectory_centr_grupami'
 IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=directory)
 Dict = Drzwi
 PLDA_impostor, PLDA_target = get_scores(Dict)
+LR = get_LR(PLDA_impostor, PLDA_target)
+
 print()
 '''
 Scores = {}

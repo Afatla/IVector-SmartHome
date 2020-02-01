@@ -4,6 +4,12 @@ import matplotlib
 from sklearn.decomposition import PCA
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
+import copy
+from sklearn.preprocessing import LabelEncoder
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+
+
 def load_ivectors(IVectors={}, Drzwi={}, Muzyka={}, Swiatlo={}, Temp={}, directory=""):
     for file in os.listdir(directory):
         f = open(directory + "/" + file)
@@ -23,6 +29,7 @@ def load_ivectors(IVectors={}, Drzwi={}, Muzyka={}, Swiatlo={}, Temp={}, directo
         IVectors[file.split(".")[0]] = ivector
     return IVectors, Drzwi, Muzyka, Swiatlo, Temp
 
+
 def get_people(IVectors, people=[]):
     for key in list(IVectors.keys()):
         if len(key.split("_")) == 3:
@@ -32,6 +39,7 @@ def get_people(IVectors, people=[]):
             if key.split("_")[-4] + "_" + key.split("_")[-3] not in people:
                 people.append(key.split("_")[-4] + "_" + key.split("_")[-3])
     return people
+
 
 def filter_people(ivecs, Dict, Keys=[], X=[], p=None):
     if p == None:
@@ -49,6 +57,7 @@ def filter_people(ivecs, Dict, Keys=[], X=[], p=None):
                     X.append(ivecs[i])
         return X, Keys
 
+
 def reduction_pca(Dict):
     X = list(Dict.values())
     pca = PCA(n_components=100)
@@ -61,6 +70,7 @@ def reduction_pca(Dict):
         i += 1
     return Dict
 
+
 def get_distances(X, Keys, Dict):
     X, Keys = filter_people(X, Dict, Keys)
     Distances = {}
@@ -69,6 +79,7 @@ def get_distances(X, Keys, Dict):
             Distances[Keys[i] + " " + Keys[j]] = CDS(X[i], X[j])
 
     return Distances
+
 
 def cds_all(Dict, same_person_D = {}, diff_person_D = {}):
     # kazdy z kazdym
@@ -91,6 +102,7 @@ def cds_all(Dict, same_person_D = {}, diff_person_D = {}):
     drzwi_min_diff = np.min(np.array(diff_person_D.values()))
     drzwi_min_same = np.min(np.array(same_person_D.values())[np.array(same_person_D.values()) > 0])
     return drzwi_max_diff, drzwi_max_same, drzwi_min_diff, drzwi_min_same
+
 
 def mean_cds(Dict, Distances_impostor={}, Distances_target={}):
     people = get_people(Dict)
@@ -116,6 +128,7 @@ def mean_cds(Dict, Distances_impostor={}, Distances_target={}):
         Distances_target[key_t] = float(Distances_target[key_t] / idx)
         idx = 0
     return Distances_impostor, Distances_target
+
 
 def get_error_lists(Distances_impostor, Distances_target):
     mini = np.min(np.array(list(Distances_target.values())))
@@ -143,36 +156,140 @@ def get_error_lists(Distances_impostor, Distances_target):
         FAR_list.append(FAR)
     return FRR_list, FAR_list, mini, maxi
 
-def far_frr_plot(mini, maxi, FAR_list, FRR_list):
+
+def get_people(IVectors, osoby=[]):
+    for key in list(IVectors.keys()):
+        if len(key.split("_")) == 3:
+            if key.split("_")[-3] not in osoby:
+                osoby.append(key.split("_")[-3])
+        if len(key.split("_")) == 4:
+            if key.split("_")[-4] + "_" + key.split("_")[-3] not in osoby:
+                osoby.append(key.split("_")[-4] + "_" + key.split("_")[-3])
+    return osoby
+
+
+def get_codes(Dict, people, codes=[]):
+    for key in list(Dict.keys()):
+        for i in range(len(people)):
+            if len(key.split("_")) == 3:
+                if key.split("_")[-3] == people[i]:
+                    codes.append(i)
+
+            if len(key.split("_")) == 4:
+                if key.split("_")[-4] + "_" + key.split("_")[-3] == people[i]:
+                    codes.append(i)
+
+    return codes
+
+
+def get_columns(n=600):
+    lista = []
+    for i in range(0, n):
+        lista.append("el_"+str(i))
+    return lista
+
+
+def get_LDA(Dict):
+    lista = get_columns()
+    X_lda_Dict = {}
+    lda = LDA(n_components=3)
+    le = LabelEncoder()
+    X = np.array(list(Dict.values()))
+    X = pd.DataFrame(X, columns=lista)
+    people = get_people(Dict)
+    codes = get_codes(Dict, people)
+    y = pd.Categorical.from_codes(codes, people)
+    df = X.join(pd.Series(y, name='class'))
+    y = le.fit_transform(df['class'])
+    X_lda = lda.fit_transform(X, y)
+
+    for i in range(len(list(Dict.keys()))):
+        X_lda_Dict[list(Dict.keys())[i]] = X_lda[i]
+    return X_lda_Dict
+
+def far_frr_plot(mini, maxi, FAR_list, FRR_list, eer, idx, Distances_impostor, Distances_target,
+                 name=None, impostor_list={}, target_list={}):
+
     plt.plot(np.arange(mini, maxi, 1e-4), FAR_list)
     plt.plot(np.arange(mini, maxi, 1e-4), FRR_list)
-    plt.legend(["FAR", "FRR"])
-    plt.ylabel("Wartosc bledu")
-    plt.xlabel("Prog akceptacji")
-    plt.show()
 
-def det_plot(FAR_list, FRR_list):
+    plt.yticks([0, eer, 0.2, 0.4, 0.6, 0.8, 1])
+
+    x_ticks = [0.85, 0.9, np.arange(mini, maxi, 1e-4)[idx], 1.05, 1.1, 1.15]
+    x = x_ticks
+    for i in x:
+        impostor_list[i] = 0
+        target_list[i] = 0
+    for impostor in list(Distances_impostor.values()):
+        for i in range(len(x)):
+            if i != 0:
+                if impostor <= x[i] and impostor > x[i-1]:
+                    impostor_list[x[i]] += 1
+            else:
+                if impostor <= x[i]:
+                    impostor_list[x[i]] += 1
+    for target in list(Distances_target.values()):
+        for i in range(len(x)):
+            if i != 0:
+                if target <= x[i] and target > x[i-1]:
+                    target_list[x[i]] += 1
+            else:
+                if target <= x[i]:
+                    target_list[x[i]] += 1
+    suma_i = np.sum(np.array(impostor_list.values()))
+    for key in list(impostor_list.keys()):
+        impostor_list[key] = np.float(impostor_list[key])/np.float(suma_i)
+    suma_t = np.sum(np.array(target_list.values()))
+    for key in list(target_list.keys()):
+        target_list[key] = np.float(target_list[key]) / np.float(suma_t)
+    plt.xticks(x_ticks)
+    plt.ylabel("Wartosc bledu")
+    plt.xlabel("Prog akceptacji (wartosc CDS)")
+    plt.grid()
+    plt.bar(np.array(target_list.keys()), height=np.array(target_list.values()), width=0.1, alpha=0.6)
+
+    plt.bar(np.array(impostor_list.keys()), height=np.array(impostor_list.values()), width=0.1, alpha=0.6)
+    plt.legend(["FAR", "FRR", "target", "impostor"])
+
+    plt.show()
+    if name != None:
+        plt.savefig(name)
+
+
+def det_plot(FAR_list, FRR_list, name=None):
+    for i in range(len(FRR_list)):
+        if abs(FAR_list[i] - FRR_list[i]) < 0.0005:
+            idx = i
+            eer = FRR_list[i]
+            print eer
     axis_min = min(FAR_list[0], FRR_list[-1])
     fig, ax = plt.subplots()
-    plt.plot(FAR_list, FRR_list)
+
     plt.xlabel("FAR")
     plt.ylabel("FRR")
     plt.yscale('log')
     plt.xscale('log')
+    plt.scatter(eer, eer, c="k", s=40)
+    plt.plot(FAR_list, FRR_list)
     ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
     ax.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+    plt.text(eer, eer+0.005, "EER="+str(eer))
+    plt.grid()
     plt.show()
+    if name != None:
+        plt.savefig(name)
+    return eer, idx
 
-def calculate_and_plot(Dict):
-    Distances_impostor, Distances_target = mean_cds(Dict)
-    FRR_list, FAR_list, mini, maxi = get_error_lists(Distances_impostor, Distances_target)
-    #far_frr_plot(mini, maxi, FAR_list, FRR_list)
-    det_plot(FAR_list, FRR_list)
-    return Distances_impostor, Distances_target, FRR_list, FAR_list, mini, maxi
 
 path = 'C:/AGA_studia/inzynierka/DATA/ivectory_centr_grupami'
 IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=path)
 Dict = Drzwi
-calculate_and_plot(Dict)
 
-Dict = Muzyka
+Distances_impostor, Distances_target = mean_cds(Dict)
+FRR_list, FAR_list, mini, maxi = get_error_lists(Distances_impostor, Distances_target)
+eer, idx = det_plot(FAR_list, FRR_list)
+
+far_frr_plot(mini, maxi, FAR_list, FRR_list, eer, idx, Distances_impostor, Distances_target)
+
+
+print()
