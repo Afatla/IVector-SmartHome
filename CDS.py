@@ -10,7 +10,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 
 
-def load_ivectors(IVectors={}, Drzwi={}, Muzyka={}, Swiatlo={}, Temp={}, directory=""):
+def load_ivectors(IVectors={}, Drzwi={}, Muzyka={}, Swiatlo={}, Temp={}, directory="", filter=None):
     for file in os.listdir(directory):
         f = open(directory + "/" + file)
         ivector = f.read().split()
@@ -27,6 +27,43 @@ def load_ivectors(IVectors={}, Drzwi={}, Muzyka={}, Swiatlo={}, Temp={}, directo
         elif file.split("_")[-2] == "temp":
             Temp[file.split(".")[0]] = ivector
         IVectors[file.split(".")[0]] = ivector
+    if filter != None:
+        Drzwi_filter = {}
+        Muzyka_filter = {}
+        Swiatlo_filter = {}
+        Temp_filter = {}
+        people = get_people(IVectors)
+        for p in people:
+            idx = 0
+            for key in list(Drzwi.keys()):
+                if p+"_" == key.split("drzwi")[0]:
+                    idx += 1
+                    if idx < filter:
+                        Drzwi_filter[key] = Drzwi[key]
+        for p in people:
+            idx = 0
+            for key in list(Muzyka.keys()):
+                if p+"_" == key.split("muzyka")[0]:
+                    idx += 1
+                    if idx < filter:
+                        Muzyka_filter[key] = Muzyka[key]
+        for p in people:
+            idx = 0
+            for key in list(Swiatlo.keys()):
+                if p+"_" == key.split("swiatlo")[0]:
+                    idx += 1
+                    if idx < filter:
+                        Swiatlo_filter[key] = Swiatlo[key]
+        for p in people:
+            idx = 0
+            for key in list(Temp.keys()):
+                if p + "_" == key.split("temp")[0]:
+                    idx += 1
+                    if idx < filter:
+                        Temp_filter[key] = Temp[key]
+
+        return IVectors, Drzwi_filter, Muzyka_filter, Swiatlo_filter, Temp_filter
+
     return IVectors, Drzwi, Muzyka, Swiatlo, Temp
 
 
@@ -209,11 +246,12 @@ def get_LDA(Dict):
 
 def far_frr_plot(mini, maxi, FAR_list, FRR_list, eer, idx, Distances_impostor, Distances_target,
                  name=None, impostor_list={}, target_list={}):
-
+    impostor_list = {}
+    target_list = {}
     plt.plot(np.arange(mini, maxi, 1e-4), FAR_list)
     plt.plot(np.arange(mini, maxi, 1e-4), FRR_list)
 
-    plt.yticks([0, eer, 0.2, 0.4, 0.6, 0.8, 1])
+    plt.yticks([0, 0.2, eer, 0.4, 0.6, 0.8, 1])
 
     x_ticks = [0.85, 0.9, np.arange(mini, maxi, 1e-4)[idx], 1.05, 1.1, 1.15]
     x = x_ticks
@@ -258,7 +296,7 @@ def far_frr_plot(mini, maxi, FAR_list, FRR_list, eer, idx, Distances_impostor, D
 
 def det_plot(FAR_list, FRR_list, name=None):
     for i in range(len(FRR_list)):
-        if abs(FAR_list[i] - FRR_list[i]) < 0.0005:
+        if abs(FAR_list[i] - FRR_list[i]) < 0.001:
             idx = i
             eer = FRR_list[i]
             print eer
@@ -273,7 +311,7 @@ def det_plot(FAR_list, FRR_list, name=None):
     plt.plot(FAR_list, FRR_list)
     ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
     ax.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
-    plt.text(eer, eer+0.005, "EER="+str(eer))
+    plt.text(eer, eer+0.01, "EER=0.284")
     plt.grid()
     plt.show()
     if name != None:
@@ -282,14 +320,116 @@ def det_plot(FAR_list, FRR_list, name=None):
 
 
 path = 'C:/AGA_studia/inzynierka/DATA/ivectory_centr_grupami'
-IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=path)
-Dict = Drzwi
-
+#IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=path, filter=4)
+EER = []
+for f in range(4, 13):
+    IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=path, filter=f)
+    Dict = Swiatlo
+    Distances_impostor, Distances_target = mean_cds(Dict)
+    FRR_list, FAR_list, mini, maxi = get_error_lists(Distances_impostor, Distances_target)
+    for i in range(len(FRR_list)):
+        if abs(FAR_list[i] - FRR_list[i]) < 0.0003:
+            idx = i
+            eer = FRR_list[i]
+            print eer
+    EER.append(eer)
+x = [2, 3, 4, 5, 6, 7, 8, 9]
+plt.plot(x, EER, color="b")
+plt.plot(x, EER, "bo")
+plt.grid()
+plt.xlabel("Liczba nagran treningowych")
+plt.ylabel("EER")
+plt.show()
+#far_frr_plot(mini, maxi, FRR_list, FAR_list, eer, idx, Distances_impostor, Distances_target)
+'''
+Dict = Temp
+fig, ax = plt.subplots()
 Distances_impostor, Distances_target = mean_cds(Dict)
 FRR_list, FAR_list, mini, maxi = get_error_lists(Distances_impostor, Distances_target)
-eer, idx = det_plot(FAR_list, FRR_list)
+for i in range(len(FRR_list)):
+    if abs(FAR_list[i] - FRR_list[i]) < 0.002:
+        idx = i
+        eer = FRR_list[i]
+        print eer
+axis_min = min(FAR_list[0], FRR_list[-1])
+plt.scatter(eer, eer, c="k", s=40)
+plt.plot(FAR_list, FRR_list)
+ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+ax.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 
-far_frr_plot(mini, maxi, FAR_list, FRR_list, eer, idx, Distances_impostor, Distances_target)
+IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=path, filter=6)
+Dict = Temp
+Distances_impostor, Distances_target = mean_cds(Dict)
+FRR_list, FAR_list, mini, maxi = get_error_lists(Distances_impostor, Distances_target)
+for i in range(len(FRR_list)):
+    if abs(FAR_list[i] - FRR_list[i]) < 0.001:
+        idx = i
+        eer = FRR_list[i]
+        print eer
+axis_min = min(FAR_list[0], FRR_list[-1])
+plt.scatter(eer, eer, c="k", s=40)
+plt.plot(FAR_list, FRR_list)
+ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+ax.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 
+
+IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=path, filter=9)
+Dict = Temp
+Distances_impostor, Distances_target = mean_cds(Dict)
+FRR_list, FAR_list, mini, maxi = get_error_lists(Distances_impostor, Distances_target)
+for i in range(len(FRR_list)):
+    if abs(FAR_list[i] - FRR_list[i]) < 0.001:
+        idx = i
+        eer = FRR_list[i]
+        print eer
+axis_min = min(FAR_list[0], FRR_list[-1])
+plt.scatter(eer, eer, c="k", s=40)
+plt.plot(FAR_list, FRR_list)
+ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+ax.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+
+IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=path, filter=None)
+Dict = Temp
+Distances_impostor, Distances_target = mean_cds(Dict)
+FRR_list, FAR_list, mini, maxi = get_error_lists(Distances_impostor, Distances_target)
+for i in range(len(FRR_list)):
+    if abs(FAR_list[i] - FRR_list[i]) < 0.002:
+        idx = i
+        eer = FRR_list[i]
+        print eer
+axis_min = min(FAR_list[0], FRR_list[-1])
+plt.scatter(eer, eer, c="k", s=40)
+plt.plot(FAR_list, FRR_list)
+ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+ax.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+plt.grid()
+plt.xlabel("FAR")
+plt.ylabel("FRR")
+plt.yscale('log')
+plt.xscale('log')
+plt.legend(["2 treningowe", "4 treningowe", "7 treningowych", "9 treningowych"])
+plt.show()
+'''
+'''
+#muzyka
+EER = [0.294, 0.284, 0.287, 0.292, 0.295, 0.286, 0.285, 0.285]
+x = [2, 3, 4, 5, 6, 7, 8, 9]
+plt.plot(x, EER, color="b")
+plt.plot(x, EER, "bo")
+plt.grid()
+plt.xlabel("Liczba nagran treningowych")
+plt.ylabel("EER")
+plt.show()
+
+#drzwi
+EER = [0.328, 0.302, 0.297, 0.2865, 0.293, 0.284, 0.287, 0.2928]
+x = [2, 3, 4, 5, 6, 7, 8, 9]
+plt.plot(x, EER, color="b")
+plt.plot(x, EER, "bo")
+plt.grid()
+plt.xlabel("Liczba nagran treningowych")
+plt.ylabel("EER")
+plt.show()
+'''
 
 print()
