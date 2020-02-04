@@ -37,18 +37,18 @@ def get_people(IVectors, osoby=[]):
     return osoby
 
 
-def get_codes(Dict, people, codes=[]):
+def get_codes(Dict, people, codes=[], Codes={}):
     for key in list(Dict.keys()):
         for i in range(len(people)):
             if len(key.split("_")) == 3:
                 if key.split("_")[-3] == people[i]:
                     codes.append(i)
-
+                    Codes[i] = people[i]
             if len(key.split("_")) == 4:
                 if key.split("_")[-4] + "_" + key.split("_")[-3] == people[i]:
                     codes.append(i)
-
-    return codes
+                    Codes[i] = people[i]
+    return codes, Codes
 
 
 def get_columns(n=600):
@@ -58,7 +58,7 @@ def get_columns(n=600):
     return lista
 
 
-def get_LDA(Dict, lista, n_comp=3, n_test=2, Results={}, le=LabelEncoder()):
+def get_LDA(Dict, lista, n_comp=63, n_test=1, Results={}, le=LabelEncoder()):
     l = list(Dict.keys())
     l.sort(key=lambda x: int(x.rsplit('_', 1)[-1]))
     for i in range(0, len(Dict)-n_test, n_test):
@@ -73,15 +73,14 @@ def get_LDA(Dict, lista, n_comp=3, n_test=2, Results={}, le=LabelEncoder()):
         X = np.array(list(train_Dict.values()))
         X = pd.DataFrame(X, columns=lista)
         people = get_people(train_Dict)
-        codes = get_codes(train_Dict, people)
+        codes, Codes = get_codes(train_Dict, people)
 
         y = pd.Categorical.from_codes(codes, people)
         df = X.join(pd.Series(y, name='class'))
         y = le.fit_transform(df['class'])
-        X_lda = lda.fit(X, y)
+        X_lda = lda.fit_transform(X, y)
         people.sort()
         p = lda.predict(test_list)
-
         for n in range(n_test):
             Results[test_class[n]] = people[p[n]]
     return Results
