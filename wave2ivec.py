@@ -483,11 +483,13 @@ class IVector():
 
             self.save_ivector_to_file(ivector,
                                       directory_ivectors+"/"+
-                                      file.split("/")[-1].split(".")[0])
+                                      file.split("/")[-1].split(".")[0]+".txt")
 
 
 if __name__ == '__main__':
     o = IVector()
+    o.save_ivectors('C:/AGA_studia/inzynierka/DATA/wavy_sklejone_zdania_po_8',
+                    'C:/AGA_studia/inzynierka/DATA/ivectory_sklejone_zdania_po_8')
 
 
     print()

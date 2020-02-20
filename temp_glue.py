@@ -15,15 +15,9 @@ for file in os.listdir(directory):
     sound = AudioSegment.from_wav(directory+"/"+file)
     if count == 1:
         combined_sound = sound
-    if count > 1 and count <= 2:
+    if count > 1 and count <= 8:
         combined_sound += sound
-    if count == 2:
-        combined_sound.export(directory2 + "/" + file, format="wav")
-    if count == 3:
-        combined_sound = sound
-    if count > 3 and count <= 10:
-        combined_sound += sound
-    if count == 10:
+    if count == 8:
         combined_sound.export(directory3 + "/" + file, format="wav")
         count = 0
 

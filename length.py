@@ -1,6 +1,6 @@
 import soundfile as sf
 import os
-path = 'C:/AGA_studia/inzynierka/DATA/wavy_sklejone_zdania_po_5'
+path = 'C:/AGA_studia/inzynierka/DATA/wavy_sklejone_dla_mowcy'
 duration = 0
 idx = 0
 for fname in os.listdir(path):

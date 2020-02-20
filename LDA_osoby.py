@@ -79,10 +79,15 @@ def get_LDA(Dict, lista, n_comp=63, n_test=1, Results={}, le=LabelEncoder()):
         df = X.join(pd.Series(y, name='class'))
         y = le.fit_transform(df['class'])
         X_lda = lda.fit_transform(X, y)
+        #train_class = list(train_Dict.keys())
+        #train_list = list(train_Dict.values())
+
         people.sort()
+
         p = lda.predict(test_list)
         for n in range(n_test):
             Results[test_class[n]] = people[p[n]]
+
     return Results
 
 
@@ -101,9 +106,9 @@ def scatter(X_lda):
     plt.show()
 
 
-directory = 'C:/AGA_studia/inzynierka/DATA/ivectory_centr_grupami'
+directory = 'C:/AGA_studia/inzynierka/DATA/ivectory_sklejone_dla_mowcy'
 IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=directory)
-Dict = Drzwi
+Dict = IVectors
 R_d, error_d = get_error(Dict)
 
 Dict = Muzyka

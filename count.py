@@ -1,16 +1,20 @@
 import os
 import numpy as np
 
-directory = 'C:/AGA_studia/inzynierka/DATA/wavy_sklejone_zdania_po_5_mezczyzni'
-Labels = []
+directory = 'C:/AGA_studia/inzynierka/DATA/wavy_sklejone_zdania_po_10'
+drzwi = 0
+muzyka = 0
+swiatlo = 0
+temp = 0
 for file in os.listdir(directory):
-    Labels.append(file.split("_")[-2])
-drzwi = Labels.count("drzwi")
-muz = Labels.count("muzyka")
-sw = Labels.count("swiatlo")
-temp = Labels.count("temp")
-l = len(Labels)
-print()
+   if file.split("_")[-2] == "drzwi":
+       drzwi += 1
+   if file.split("_")[-2] == "muzyka":
+       muzyka += 1
+   if file.split("_")[-2] == "swiatlo":
+       swiatlo += 1
+   if file.split("_")[-2] == "temp":
+       temp += 1
 
 Count = {}
 z_bliska = 0
