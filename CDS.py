@@ -134,11 +134,11 @@ def far_frr_plot(mini, maxi, FAR_list, FRR_list, eer, idx,
     plt.plot(np.arange(mini, maxi, 1e-4), FAR_list)
     plt.plot(np.arange(mini, maxi, 1e-4), FRR_list)
 
-    plt.yticks([0, 0.2, eer, 0.4, 0.6, 0.8, 1])
+    plt.yticks([0, 0.2, eer, 0.6, 0.8, 1])
 
-    x_ticks = [0.2, 0.4, 0.6, np.arange(mini, maxi, 1e-4)[idx], 1.1, 1.2]
-    x = [0.7, 0.8, 0.85, np.arange(mini, maxi, 1e-4)[idx], 1, maxi]
-    plt.xlim(0.6, 1.3)
+
+    x = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75,0.8, 0.85, 0.95, np.arange(mini, maxi, 1e-4)[idx], maxi, 1.05, 1.03,0.9]
+    x_ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
     for i in x:
         impostor_list[i] = 0
         target_list[i] = 0
@@ -228,18 +228,54 @@ def mean_cds_glue(Dict_test, Dict_train, Distances_impostor={}, Distances_target
 
 path_1 = 'C:/AGA_studia/inzynierka/DATA/ivectory_sklejone_zdania_po_8_centr_grupami'
 IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=path_1, filter=None)
-Dict_train = copy.deepcopy(Drzwi)
-path_2 = 'C:/AGA_studia/inzynierka/DATA/ivectory_sklejone_zdania_po_2_centr_grupami'
+Dict_train = copy.deepcopy(Muzyka)
+path_2 = 'C:/AGA_studia/inzynierka/DATA/ivectory_1_centr_grupami'
 IVectors_test, Drzwi_test, Muzyka_test, Swiatlo_test, Temp_test = load_ivectors(directory=path_2, filter=None)
-Dict_test = copy.deepcopy(Drzwi_test)
+Dict_test = copy.deepcopy(Muzyka_test)
 Distances_impostor, Distances_target = mean_cds_glue(Dict_test, Dict_train)
+
+
+path_3 = 'C:/AGA_studia/inzynierka/DATA/ivectory_sklejone_zdania_po_8_2_centr_grupami'
+IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=path_3, filter=None)
+Dict_train = copy.deepcopy(Muzyka)
+path_4 = 'C:/AGA_studia/inzynierka/DATA/ivectory_2_centr_grupami'
+IVectors_test, Drzwi_test, Muzyka_test, Swiatlo_test, Temp_test = load_ivectors(directory=path_4, filter=None)
+Dict_test = copy.deepcopy(Muzyka_test)
+Distances_impostor, Distances_target = mean_cds_glue(Dict_test, Dict_train, Distances_impostor=Distances_impostor, Distances_target=Distances_target)
+
+
+path_5 = 'C:/AGA_studia/inzynierka/DATA/ivectory_sklejone_zdania_po_8_3_centr_grupami'
+IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=path_5, filter=None)
+Dict_train = copy.deepcopy(Muzyka)
+path_6 = 'C:/AGA_studia/inzynierka/DATA/ivectory_3_centr_grupami'
+IVectors_test, Drzwi_test, Muzyka_test, Swiatlo_test, Temp_test = load_ivectors(directory=path_6, filter=None)
+Dict_test = copy.deepcopy(Muzyka_test)
+Distances_impostor, Distances_target = mean_cds_glue(Dict_test, Dict_train, Distances_impostor=Distances_impostor, Distances_target=Distances_target)
+
+
+path_7 = 'C:/AGA_studia/inzynierka/DATA/ivectory_sklejone_zdania_po_8_4_centr_grupami'
+IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=path_7, filter=None)
+Dict_train = copy.deepcopy(Muzyka)
+path_8 = 'C:/AGA_studia/inzynierka/DATA/ivectory_4_centr_grupami'
+IVectors_test, Drzwi_test, Muzyka_test, Swiatlo_test, Temp_test = load_ivectors(directory=path_8, filter=None)
+Dict_test = copy.deepcopy(Muzyka_test)
+Distances_impostor, Distances_target = mean_cds_glue(Dict_test, Dict_train, Distances_impostor=Distances_impostor, Distances_target=Distances_target)
+
+
+path_9 = 'C:/AGA_studia/inzynierka/DATA/ivectory_sklejone_zdania_po_8_5_centr_grupami'
+IVectors, Drzwi, Muzyka, Swiatlo, Temp = load_ivectors(directory=path_9, filter=None)
+Dict_train = copy.deepcopy(Muzyka)
+path_10 = 'C:/AGA_studia/inzynierka/DATA/ivectory_5_centr_grupami'
+IVectors_test, Drzwi_test, Muzyka_test, Swiatlo_test, Temp_test = load_ivectors(directory=path_10, filter=None)
+Dict_test = copy.deepcopy(Muzyka_test)
+Distances_impostor, Distances_target = mean_cds_glue(Dict_test, Dict_train, Distances_impostor=Distances_impostor, Distances_target=Distances_target)
 FRR_list, FAR_list, mini, maxi = get_error_lists(Distances_impostor, Distances_target)
 for i in range(len(FRR_list)):
     if abs(FAR_list[i] - FRR_list[i]) <= 0.001:
         idx = i
         eer = FRR_list[i]
         print eer
-    far_frr_plot(mini, maxi, FAR_list, FRR_list, eer, idx, Distances_impostor, Distances_target)
+far_frr_plot(mini, maxi, FAR_list, FRR_list, eer, idx, Distances_impostor, Distances_target)
 
 
 print()

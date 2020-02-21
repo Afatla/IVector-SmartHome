@@ -1,30 +1,33 @@
 import os
 from pydub import AudioSegment
-'''
-d = 'C:/AGA_studia/inzynierka/DATA/ivectory_po_5_centr_grupami'
-for file in os. listdir(d):
-    os.rename(d+"/"+file, d+"/"+file[1:len(file)])
-'''
-directory = 'C:/AGA_studia/inzynierka/DATA/wavy_glue'
-directory2 = 'C:/AGA_studia/inzynierka/DATA/wavy_sklejone_zdania_po_2'
-directory3 = 'C:/AGA_studia/inzynierka/DATA/wavy_sklejone_zdania_po_8'
+
+directory = 'C:/AGA_studia/inzynierka/DATA/wavy_copy'
+directory2 = 'C:/AGA_studia/inzynierka/DATA/wavy_1'
+directory3 = 'C:/AGA_studia/inzynierka/DATA/wavy_2'
+directory4 = 'C:/AGA_studia/inzynierka/DATA/wavy_3'
+directory5 = 'C:/AGA_studia/inzynierka/DATA/wavy_4'
+directory6 = 'C:/AGA_studia/inzynierka/DATA/wavy_5'
 
 count = 0
 for file in os.listdir(directory):
     count += 1
     sound = AudioSegment.from_wav(directory+"/"+file)
-    if count == 1:
-        combined_sound = sound
-    if count > 1 and count <= 2:
-        combined_sound += sound
-    if count == 2:
-        combined_sound.export(directory2 + "/" + file, format="wav")
-    if count == 3:
-        combined_sound = sound
-    if count > 3 and count <= 10:
-        combined_sound += sound
+    if count == 1 or count == 2:
+        combined_sound_1 = sound
+        combined_sound_1.export(directory2 + "/" + file, format="wav")
+    if count == 3 or count == 4:
+        combined_sound_2 = sound
+        combined_sound_2.export(directory3 + "/" + file, format="wav")
+    if count == 5 or count == 6:
+        combined_sound_3 = sound
+        combined_sound_3.export(directory4 + "/" + file, format="wav")
+    if count == 7 or count == 8:
+        combined_sound_4 = sound
+        combined_sound_4.export(directory5 + "/" + file, format="wav")
+    if count == 9 or count == 10:
+        combined_sound_5 = sound
+        combined_sound_5.export(directory6 + "/" + file, format="wav")
     if count == 10:
-        combined_sound.export(directory3 + "/" + file, format="wav")
         count = 0
 
 

@@ -488,10 +488,21 @@ class IVector():
 
 if __name__ == '__main__':
     o = IVector()
-    o.save_ivectors('C:/AGA_studia/inzynierka/DATA/wavy_sklejone_zdania_po_8',
-                    'C:/AGA_studia/inzynierka/DATA/ivectory_sklejone_zdania_po_8')
-
-
+    directory2 = 'C:/AGA_studia/inzynierka/DATA/wavy_1'
+    directory3 = 'C:/AGA_studia/inzynierka/DATA/wavy_2'
+    directory4 = 'C:/AGA_studia/inzynierka/DATA/wavy_3'
+    directory5 = 'C:/AGA_studia/inzynierka/DATA/wavy_4'
+    directory6 = 'C:/AGA_studia/inzynierka/DATA/wavy_5'
+    o.save_ivectors(directory2,
+                    'C:/AGA_studia/inzynierka/DATA/ivectory_1')
+    o.save_ivectors(directory3,
+                    'C:/AGA_studia/inzynierka/DATA/ivectory_2')
+    o.save_ivectors(directory4,
+                    'C:/AGA_studia/inzynierka/DATA/ivectory_3')
+    o.save_ivectors(directory5,
+                    'C:/AGA_studia/inzynierka/DATA/ivectory_4')
+    o.save_ivectors(directory6,
+                    'C:/AGA_studia/inzynierka/DATA/ivectory_5')
     print()
 
 
